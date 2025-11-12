@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" role="img" aria-labelledby="madaTitle madaDesc">
+  <title id="madaTitle">Mada logo</title>
+  <desc id="madaDesc">Stylized Mada payment network logo.</desc>
+  <rect width="160" height="96" rx="16" fill="#ffffff" />
+  <path d="M14 20h132v56H14z" fill="#0064a0" />
+  <rect x="14" y="20" width="40" height="56" fill="#00ad93" />
+  <path d="M70 34h36v12H70z" fill="#ffffff" />
+  <path d="M70 50h36v12H70z" fill="#00ad93" />
+  <rect x="112" y="34" width="26" height="28" fill="#ffffff" />
+  <path d="M112 34h26v12h-26z" fill="#00ad93" />
+</svg>

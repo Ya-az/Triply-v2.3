@@ -1,0 +1,456 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans bg-triply-sand text-triply-slate antialiased transition-colors duration-300;
+  }
+
+  .dark body {
+    @apply bg-dark-bg text-dark-text-primary;
+  }
+
+  /* Hide number input spinners globally */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  ::selection {
+    background-color: rgba(213, 156, 86, 0.25);
+    color: #0f5b4a;
+  }
+
+  .dark ::selection {
+    background-color: rgba(213, 156, 86, 0.4);
+    color: #e8f2f0;
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slideDown {
+    animation: slideDown 0.4s ease-out;
+  }
+
+  @keyframes slide-down {
+    from {
+      transform: translate(-50%, -120%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Scroll Reveal Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(60px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(20px, -20px);
+    }
+    50% {
+      transform: translate(-15px, 15px);
+    }
+    75% {
+      transform: translate(15px, 10px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes gradient-x {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2.5s infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+
+  .animate-gradient-x {
+    animation: gradient-x 3s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  /* Print styles for invoice */
+  @media print {
+    body {
+      background: white !important;
+      color: black !important;
+    }
+
+    .print\\:hidden {
+      display: none !important;
+    }
+
+    @page {
+      margin: 1cm;
+    }
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-soft rounded-2xl transition-all duration-300;
+  }
+
+  .dark .glass-panel {
+    @apply bg-dark-elevated/60 border-dark-border/40 shadow-soft-dark;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-22;
+  }
+
+  .section-wrapper {
+    @apply mx-auto max-w-6xl px-6;
+  }
+
+  .heading-gradient {
+    @apply bg-gradient-to-l from-triply-accent via-triply-teal to-triply-dark bg-clip-text text-transparent;
+  }
+
+  .dark .heading-gradient {
+    @apply from-triply-accentLight via-triply-mint to-triply-light;
+  }
+  /* Unified wordmark gradient for Triply brand name */
+  .brand-word-gradient {
+    background: linear-gradient(90deg, #57b6a6 0%, #0f5b4a 22%, #1f7f6c 45%, #d59c56 70%, #f2c892 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dark .brand-word-gradient {
+    background: linear-gradient(90deg, #57b6a6 0%, #c9e8e0 25%, #d59c56 55%, #f2c892 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .card-surface {
+    @apply bg-white/80 border border-triply-mint/30 rounded-2xl shadow-soft hover:shadow-ambient transition-all duration-300;
+  }
+
+  .dark .card-surface {
+    @apply bg-dark-surface/80 border-dark-border/50 shadow-soft-dark hover:shadow-ambient-dark;
+  }
+
+  /* Scroll Reveal Classes */
+  .reveal {
+    opacity: 0;
+    transition: all 0.6s ease-out;
+  }
+
+  .reveal-visible {
+    opacity: 1;
+  }
+
+  .reveal-fade-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .reveal-fade-down {
+    animation: fadeInDown 0.8s ease-out forwards;
+  }
+
+  .reveal-fade-left {
+    animation: fadeInLeft 0.8s ease-out forwards;
+  }
+
+  .reveal-fade-right {
+    animation: fadeInRight 0.8s ease-out forwards;
+  }
+
+  .reveal-fade {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  .reveal-scale {
+    animation: scaleIn 0.8s ease-out forwards;
+  }
+
+  .reveal-slide-up {
+    animation: slideInUp 1s ease-out forwards;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+
+  /* Fix select and option colors in dark mode */
+  .dark select {
+    color-scheme: dark;
+    background-color: #1a2332 !important;
+    color: #e8f2f0 !important;
+  }
+
+  .dark select option {
+    background: linear-gradient(to bottom, #1a2332 0%, #1a2332 100%) !important;
+    color: #e8f2f0 !important;
+  }
+
+  .dark select:focus {
+    background-color: #1a2332 !important;
+  }
+
+  /* Light mode - ensure white background */
+  select {
+    background-color: white;
+  }
+
+  select option {
+    background: linear-gradient(to bottom, white 0%, white 100%);
+    color: #2c3e3a;
+  }
+
+  /* Better styling for select dropdown */
+  select::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  select::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  select::-webkit-scrollbar-thumb {
+    background: #0f5b4a;
+    border-radius: 4px;
+  }
+
+  .dark select::-webkit-scrollbar-thumb {
+    background: #71d4c1;
+  }
+
+  /* AI Quiz Animations */
+  @keyframes progress {
+    0% {
+      width: 0%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
+  .animate-progress {
+    animation: progress 2s ease-in-out infinite;
+  }
+
+  .delay-100 {
+    animation-delay: 0.1s;
+  }
+
+  .delay-200 {
+    animation-delay: 0.2s;
+  }
+}
+
+/* Print Styles for Booking Confirmation */
+@media print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+
+  /* إخفاء العناصر غير الضرورية */
+  nav, footer, button, .no-print {
+    display: none !important;
+  }
+
+  /* تحسين الألوان للطباعة */
+  * {
+    color: black !important;
+    background: white !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  /* إظهار الحدود بشكل واضح */
+  .print\:border {
+    border: 1px solid #333 !important;
+  }
+
+  .print\:border-gray-300 {
+    border-color: #d1d5db !important;
+  }
+
+  /* تحسين الهوامش */
+  .print\:py-8 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* إظهار العناصر المهمة */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    font-weight: bold !important;
+    color: #0f5b4a !important;
+  }
+
+  /* منع تقطيع العناصر */
+  div, section {
+    page-break-inside: avoid;
+  }
+
+  /* تحسين الجداول */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  /* إظهار الروابط */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666 !important;
+  }
+}

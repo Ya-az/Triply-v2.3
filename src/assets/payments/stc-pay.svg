@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" role="img" aria-labelledby="stcTitle stcDesc">
+  <title id="stcTitle">stc pay logo</title>
+  <desc id="stcDesc">Modern stc pay digital wallet logo.</desc>
+  <rect width="160" height="96" rx="16" fill="#ffffff" />
+  <path d="M18 24h124v48H18z" fill="#4f0f8d" />
+  <path d="M28 38h40v8H28zm0 16h40v8H28z" fill="#18c48f" />
+  <path d="M82 32h50v32H82z" fill="#18c48f" />
+  <path d="M82 32h50v12H82z" fill="#4f0f8d" />
+</svg>

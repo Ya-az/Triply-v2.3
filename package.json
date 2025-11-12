@@ -1,0 +1,38 @@
+{
+  "name": "triply-website",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "dev:full": "npm-run-all --parallel dev build:watch watch:sync",
+    "build": "vite build",
+    "build:watch": "vite build --watch",
+    "watch:sync": "node watch-and-sync.js",
+    "sync": "robocopy dist docs /MIR /NFL /NDL /NJH /NJS /nc /ns /np & if %ERRORLEVEL% LSS 8 (exit /B 0) else (exit /B 1)",
+    "build:sync": "npm run build && npm run sync",
+    "preview": "vite preview",
+    "deploy": "npm run build && npm run sync && git add docs && git commit -m \"build: update docs for GitHub Pages\" && git push origin gh-pages",
+    "deploy:main": "npm run build && npm run sync && git add docs && git commit -m \"build: update docs for GitHub Pages\" && git push -u origin main"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.1.0",
+    "clsx": "^2.1.0",
+    "prop-types": "^15.8.1",
+    "qrcode": "^1.5.4",
+    "qrcode.react": "^4.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.23.1",
+    "react-router-hash-link": "^2.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "autoprefixer": "^10.4.16",
+    "chokidar": "^4.0.3",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.4.21"
+  }
+}

@@ -1,0 +1,21 @@
+# Node & build artifacts
+node_modules/
+dist/
+
+# Legacy static site (kept, but ignore potential temp files)
+legacy/*.log
+legacy/*.tmp
+
+# Environment & system
+.env
+.env.*
+*.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+
+# Debug output
+*.log
+
