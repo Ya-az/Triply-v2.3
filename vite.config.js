@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/Triply-main/',
+  base: '/Triply-v2.3/',
   server: {
     host: true,
     port: 5173
