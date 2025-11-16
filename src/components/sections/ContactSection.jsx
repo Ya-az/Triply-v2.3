@@ -62,8 +62,8 @@ function ContactSection() {
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-triply-dark dark:text-dark-text-primary mb-1 group-hover:text-triply dark:group-hover:text-triply-mint transition-colors">البريد الإلكتروني</h3>
-                <a className="text-triply-slate/80 dark:text-dark-text-secondary hover:text-triply dark:hover:text-triply-mint transition-colors" href="mailto:contact@triply.com">
-                  contact@triply.com
+                <a className="text-triply-slate/80 dark:text-dark-text-secondary hover:text-triply dark:hover:text-triply-mint transition-colors" href="mailto:iwq32j@gmail.com">
+                  iwq32j@gmail.com
                 </a>
               </div>
             </div>
@@ -76,8 +76,8 @@ function ContactSection() {
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-triply-dark dark:text-dark-text-primary mb-1 group-hover:text-triply dark:group-hover:text-triply-mint transition-colors">الهاتف</h3>
-                <a className="text-triply-slate/80 dark:text-dark-text-secondary hover:text-triply dark:hover:text-triply-mint transition-colors" href="tel:+966501234567">
-                  +966 50 123 4567
+                <a className="text-triply-slate/80 dark:text-dark-text-secondary hover:text-triply dark:hover:text-triply-mint transition-colors" href="tel:+966560578060">
+                  +966 56 057 8060
                 </a>
               </div>
             </div>

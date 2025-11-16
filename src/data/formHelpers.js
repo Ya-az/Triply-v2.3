@@ -60,7 +60,7 @@ export const formHelpers = {
     phone: {
       label: 'رقم الجوال',
       placeholder: '+966 5X XXX XXXX',
-      helper: 'مثال: +966501234567',
+      helper: 'مثال: +966560578060',
     },
     subject: {
       label: 'الموضوع',
