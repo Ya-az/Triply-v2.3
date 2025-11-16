@@ -10,9 +10,9 @@ import triplyLogo from '../assets/triply-logo.png';
  */
 function BrandLogo({ size = 'md', showText = false, className = '' }) {
   const sizeMap = {
-    sm: 'h-8 w-8',
-    md: 'h-11 w-11',
-    lg: 'h-16 w-16'
+    sm: 'h-12 w-12',
+    md: 'h-16 w-16',
+    lg: 'h-24 w-24'
   };
 
   return (

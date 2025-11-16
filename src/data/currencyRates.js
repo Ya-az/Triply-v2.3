@@ -131,7 +131,7 @@ export const convertCurrency = (amountInSAR, destination) => {
     currency: currencyInfo.currency,
     symbol: currencyInfo.symbol,
     flag: currencyInfo.flag,
-    formatted: `${convertedAmount.toLocaleString('ar-SA', { 
+    formatted: `${convertedAmount.toLocaleString('en-US', { 
       minimumFractionDigits: 0, 
       maximumFractionDigits: 0 
     })} ${currencyInfo.symbol}`
@@ -145,7 +145,7 @@ export const formatDualCurrency = (amountInSAR, destination) => {
   // إذا كانت العملة هي الريال، أعرض الريال فقط
   if (currencyInfo.currency === 'SAR') {
     return {
-      primary: `${amountInSAR.toLocaleString('ar-SA')} ريال`,
+      primary: `${amountInSAR.toLocaleString('en-US')} ريال`,
       secondary: null
     };
   }
@@ -153,7 +153,7 @@ export const formatDualCurrency = (amountInSAR, destination) => {
   const converted = convertCurrency(amountInSAR, destination);
   
   return {
-    primary: `${amountInSAR.toLocaleString('ar-SA')} ريال`,
+    primary: `${amountInSAR.toLocaleString('en-US')} ريال`,
     secondary: `${converted.flag} ${converted.formatted}`
   };
 };
