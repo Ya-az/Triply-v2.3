@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { GlassButton } from '../components/ui/GlassButton.jsx';
 import { FeedbackToast } from '../components/ui/FeedbackToast.jsx';
 import { travelCosts, calculateDays } from '../data/travelCosts.js';
+import { currencyRates } from '../data/currencyRates.js';
 import { useScrollReveal } from '../hooks/useScrollReveal.js';
 
 const STORAGE_KEY = 'triply-booking-details';
@@ -57,14 +58,82 @@ function BookingDetailsPage() {
   // استرجاع البيانات من localStorage أو URL params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const savedData = localStorage.getItem(STORAGE_KEY);
+    const savedPreferences = localStorage.getItem('triply-booking-preferences');
+    const savedBookingData = localStorage.getItem('triply-booking-data');
 
-    if (params.get('destination')) {
-      setDestination(params.get('destination'));
-    } else if (savedData) {
-      const parsed = JSON.parse(savedData);
-      setDestination(parsed.destination || 'london');
-      setCategory(parsed.category || 'budget');
+    // أولوية للبيانات من URL parameters
+    const urlDestination = params.get('destination');
+    const urlCategory = params.get('category');
+    const urlBudget = params.get('budget');
+
+    if (urlDestination) {
+      setDestination(urlDestination);
+    } else if (savedPreferences) {
+      try {
+        const parsed = JSON.parse(savedPreferences);
+        if (parsed.destinationKey) {
+          setDestination(parsed.destinationKey);
+        }
+      } catch (e) {
+        console.error('Error parsing saved preferences:', e);
+      }
+    }
+
+    // تعيين الفئة (category) من URL أو localStorage
+    if (urlCategory) {
+      setCategory(urlCategory);
+    } else if (savedPreferences) {
+      try {
+        const parsed = JSON.parse(savedPreferences);
+        if (parsed.budget) {
+          setCategory(parsed.budget);
+        }
+      } catch (e) {
+        console.error('Error parsing saved preferences:', e);
+      }
+    }
+
+    // تعيين الميزانية المحددة
+    if (urlBudget) {
+      setBudget(urlBudget);
+    } else if (savedPreferences) {
+      try {
+        const parsed = JSON.parse(savedPreferences);
+        if (parsed.userBudget) {
+          setBudget(parsed.userBudget);
+        }
+      } catch (e) {
+        console.error('Error parsing saved preferences:', e);
+      }
+    }
+
+    // استرجاع الخدمات المختارة من الصفحة الأولى
+    if (savedPreferences) {
+      try {
+        const parsed = JSON.parse(savedPreferences);
+        if (parsed.selectedFlight) setSelectedFlight(parsed.selectedFlight);
+        if (parsed.selectedHotel) setSelectedHotel(parsed.selectedHotel);
+        if (parsed.selectedRestaurant) setSelectedRestaurants([parsed.selectedRestaurant]);
+        if (parsed.selectedActivity) setSelectedActivities([parsed.selectedActivity]);
+      } catch (e) {
+        console.error('Error parsing saved preferences:', e);
+      }
+    }
+
+    // تحميل بقية البيانات المحفوظة من bookingDetails إذا وجدت
+    const bookingDetails = localStorage.getItem(STORAGE_KEY);
+    if (bookingDetails) {
+      try {
+        const parsed = JSON.parse(bookingDetails);
+        if (parsed.arrivalDate) setArrivalDate(parsed.arrivalDate);
+        if (parsed.departureDate) setDepartureDate(parsed.departureDate);
+        if (parsed.selectedFlight) setSelectedFlight(parsed.selectedFlight);
+        if (parsed.selectedHotel) setSelectedHotel(parsed.selectedHotel);
+        if (parsed.selectedRestaurants) setSelectedRestaurants(parsed.selectedRestaurants);
+        if (parsed.selectedActivities) setSelectedActivities(parsed.selectedActivities);
+      } catch (e) {
+        console.error('Error parsing booking details:', e);
+      }
     }
   }, [location]);
 
@@ -92,31 +161,53 @@ function BookingDetailsPage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }, [destination, category, arrivalDate, departureDate, days, selectedFlight, selectedHotel, selectedRestaurants, selectedActivities]);
 
+  // دالة لتحويل السعر لعملة الدولة
+  const convertCurrency = (sarPrice) => {
+    const currencyInfo = currencyRates[destination];
+    
+    if (!currencyInfo) {
+      return { sar: sarPrice, local: sarPrice, currency: 'ريال', symbol: 'ريال', flag: '🇸🇦' };
+    }
+    
+    const localPrice = (sarPrice * currencyInfo.rate).toFixed(2);
+    return {
+      sar: sarPrice,
+      local: localPrice,
+      currency: currencyInfo.currency,
+      symbol: currencyInfo.symbol,
+      flag: currencyInfo.flag
+    };
+  };
+
   // حساب التكلفة الإجمالية
   useEffect(() => {
     let total = 0;
 
     // الطيران
     if (selectedFlight) {
-      total += selectedFlight.price;
+      const flight = typeof selectedFlight === 'string' ? JSON.parse(selectedFlight) : selectedFlight;
+      total += flight.price;
     }
 
     // الفندق
     if (selectedHotel && days > 0) {
-      total += selectedHotel.price * days;
+      const hotel = typeof selectedHotel === 'string' ? JSON.parse(selectedHotel) : selectedHotel;
+      total += hotel.price * days;
     }
 
     // المطاعم
     if (selectedRestaurants.length > 0) {
       selectedRestaurants.forEach(rest => {
-        total += rest.price;
+        const restaurant = typeof rest === 'string' ? JSON.parse(rest) : rest;
+        total += restaurant.price;
       });
     }
 
     // الأنشطة
     if (selectedActivities.length > 0) {
       selectedActivities.forEach(act => {
-        total += act.price;
+        const activity = typeof act === 'string' ? JSON.parse(act) : act;
+        total += activity.price;
       });
     }
 
@@ -758,8 +849,20 @@ function BookingDetailsPage() {
 
               <div className="flex justify-between items-center p-6 rounded-2xl bg-gradient-to-r from-triply/10 via-triply-teal/10 to-triply-mint/10 dark:from-triply-mint/20 dark:via-triply-teal/20 dark:to-triply/20 border-2 border-triply dark:border-triply-mint shadow-xl mt-6">
                 <div className="text-left">
-                  <span className="text-4xl font-black text-triply dark:text-triply-mint">{totalCost.toFixed(2)}</span>
-                  <span className="text-xl font-semibold text-triply-slate dark:text-dark-text-secondary mr-2">ريال</span>
+                  <div>
+                    <span className="text-4xl font-black text-triply dark:text-triply-mint">{totalCost.toLocaleString()}</span>
+                    <span className="text-xl font-semibold text-triply-slate dark:text-dark-text-secondary mr-2">ريال 🇸🇦</span>
+                  </div>
+                  {(() => {
+                    const converted = convertCurrency(totalCost);
+                    if (converted.currency !== 'ريال') {
+                      return (
+                        <div className="text-lg text-triply-dark/70 dark:text-dark-text-secondary mt-2">
+                          {converted.flag} {Number(converted.local).toLocaleString()} {converted.symbol}
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
                 <span className="text-xl font-bold text-triply-dark dark:text-dark-text-primary">💰 المجموع الكلي</span>
               </div>

@@ -6,7 +6,8 @@
  * - تحديد جميع المسارات والصفحات المحمية
  */
 
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { MainLayout } from './layouts/MainLayout.jsx';
@@ -22,11 +23,23 @@ import Dashboard from './pages/Dashboard.jsx';
 import { Login } from './pages/auth/Login.jsx';
 import { Signup } from './pages/auth/Signup.jsx';
 
+// مكون للانتقال لأعلى الصفحة عند تغيير المسار
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          <ScrollToTop />
           <Routes>
             <Route
               path="/"

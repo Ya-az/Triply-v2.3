@@ -26,10 +26,19 @@ export const bookingServices = [
 ];
 
 export const budgetLevels = [
-  { id: 'economy', name: 'اقتصادي', description: 'خيارات موفرة ومريحة', color: 'triply-teal' },
-  { id: 'standard', name: 'متوسط', description: 'توازن بين السعر والجودة', color: 'triply' },
+  { id: 'budget', name: 'اقتصادي', description: 'خيارات موفرة ومريحة', color: 'triply-teal' },
+  { id: 'midRange', name: 'متوسط', description: 'توازن بين السعر والجودة', color: 'triply' },
   { id: 'luxury', name: 'فاخر', description: 'تجربة راقية ومميزة', color: 'triply-accent' }
 ];
+
+// تحويل أسماء الوجهات العربية إلى مفاتيح انجليزية
+export const destinationMapping = {
+  'لندن - المملكة المتحدة': 'london',
+  'باريس - فرنسا': 'paris',
+  'القاهرة - مصر': 'cairo',
+  'إسطنبول - تركيا': 'istanbul',
+  'دبي - الإمارات العربية المتحدة': 'dubai'
+};
 
 export const bookingDestinations = [
   'لندن - المملكة المتحدة',

@@ -11,11 +11,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlassButton } from '../ui/GlassButton.jsx';
 import { FeedbackToast } from '../ui/FeedbackToast.jsx';
-import { bookingServices, budgetLevels, bookingDestinations } from '../../data/bookingOptions.js';
+import { bookingServices, budgetLevels, bookingDestinations, destinationMapping } from '../../data/bookingOptions.js';
 import { formHelpers } from '../../data/formHelpers.js';
 import { FormHelper } from '../ui/FormHelper.jsx';
 import { BookingProgressIndicator } from '../BookingProgressIndicator.jsx';
 import { useScrollReveal } from '../../hooks/useScrollReveal.js';
+import { travelCosts } from '../../data/travelCosts.js';
+import { currencyRates } from '../../data/currencyRates.js';
 
 const STORAGE_KEY = 'triply-booking-preferences';
 
@@ -25,6 +27,12 @@ function BookingSection() {
   const [selectedBudget, setSelectedBudget] = useState('');
   const [selectedDestination, setSelectedDestination] = useState('');
   const [userBudget, setUserBudget] = useState('');
+  
+  // الخدمات المختارة (خدمة واحدة من كل نوع)
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [hasSavedPreferences, setHasSavedPreferences] = useState(false);
@@ -80,11 +88,69 @@ function BookingSection() {
 
   // حساب التكلفة الإجمالية للخدمات المختارة
   const calculateTotalCost = () => {
-    return selectedServices.reduce((total, serviceId) => {
-      const service = bookingServices.find(s => s.id === serviceId);
-      return total + (service?.estimatedCost || 0);
-    }, 0);
+    let total = 0;
+    if (selectedFlight) {
+      const flight = JSON.parse(selectedFlight);
+      total += flight.price;
+    }
+    if (selectedHotel) {
+      const hotel = JSON.parse(selectedHotel);
+      total += hotel.price;
+    }
+    if (selectedRestaurant) {
+      const restaurant = JSON.parse(selectedRestaurant);
+      total += restaurant.price;
+    }
+    if (selectedActivity) {
+      const activity = JSON.parse(selectedActivity);
+      total += activity.price;
+    }
+    return total;
   };
+
+  // دالة لتحويل السعر لعملة الدولة
+  const convertCurrency = (sarPrice) => {
+    if (!selectedDestination) return { sar: sarPrice, local: sarPrice, currency: 'ريال', symbol: 'ریال', flag: '🇸🇦' };
+    
+    const destKey = destinationMapping[selectedDestination];
+    const currencyInfo = currencyRates[destKey] || currencyRates[selectedDestination];
+    
+    if (!currencyInfo) {
+      return { sar: sarPrice, local: sarPrice, currency: 'ريال', symbol: 'ريال', flag: '🇸🇦' };
+    }
+    
+    const localPrice = (sarPrice * currencyInfo.rate).toFixed(2);
+    return {
+      sar: sarPrice,
+      local: localPrice,
+      currency: currencyInfo.currency,
+      symbol: currencyInfo.symbol,
+      flag: currencyInfo.flag
+    };
+  };
+  
+  // الحصول على البيانات بناءً على الوجهة والفئة المختارة
+  const getAvailableOptions = () => {
+    if (!selectedDestination || !selectedBudget) {
+      return { flights: [], hotels: [], restaurants: [], activities: [] };
+    }
+    
+    const destinationKey = destinationMapping[selectedDestination];
+    const cityData = travelCosts[destinationKey];
+    
+    if (!cityData) {
+      return { flights: [], hotels: [], restaurants: [], activities: [] };
+    }
+    
+    return {
+      flights: cityData.flights || [],
+      hotels: cityData.hotels?.[selectedBudget] || [],
+      restaurants: cityData.restaurants?.[selectedBudget] || [],
+      activities: cityData.activities?.filter(act => act.category === selectedBudget) || []
+    };
+  };
+  
+  const availableOptions = getAvailableOptions();
 
   const toggleService = (serviceId) => {
     const service = bookingServices.find(s => s.id === serviceId);
@@ -125,17 +191,37 @@ function BookingSection() {
   };
 
   const handleGetPriceQuote = () => {
+    // تحويل اسم الوجهة العربي إلى المفتاح الانجليزي
+    const destinationKey = destinationMapping[selectedDestination] || 'london';
+    
     // حفظ البيانات قبل الانتقال
     const snapshot = {
       destination: selectedDestination,
+      destinationKey: destinationKey,
       services: selectedServices,
-      budget: selectedBudget
+      budget: selectedBudget,
+      userBudget: userBudget,
+      // حفظ الخدمات المختارة
+      selectedFlight: selectedFlight,
+      selectedHotel: selectedHotel,
+      selectedRestaurant: selectedRestaurant,
+      selectedActivity: selectedActivity
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
     
-    // التوجيه للصفحة مع معلمات URL
-    const destParam = selectedDestination ? `?destination=${selectedDestination}` : '';
-    navigate(`/booking-details${destParam}`);
+    // التوجيه للصفحة مع معلمات URL (المفتاح الانجليزي والميزانية)
+    const params = new URLSearchParams();
+    if (destinationKey) {
+      params.append('destination', destinationKey);
+    }
+    if (selectedBudget) {
+      params.append('category', selectedBudget);
+    }
+    if (userBudget) {
+      params.append('budget', userBudget);
+    }
+    const queryString = params.toString();
+    navigate(`/booking-details${queryString ? '?' + queryString : ''}`);
   };
 
   const handleSavePreferences = () => {
@@ -321,44 +407,7 @@ function BookingSection() {
             </div>
           </div>
 
-          {/* اختيار الخدمات */}
-          <div className="space-y-4">
-            <label className="flex items-center gap-2 text-lg font-bold text-triply-dark dark:text-dark-text-primary">
-              <svg className="w-6 h-6 text-triply dark:text-triply-mint" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-              </svg>
-              {formHelpers.booking.services.label}
-            </label>
-            <FormHelper text={formHelpers.booking.services.helper} />
-            <div className="grid gap-3 sm:grid-cols-2">
-              {bookingServices.map((service) => (
-                <button
-                  key={service.id}
-                  type="button"
-                  onClick={() => toggleService(service.id)}
-                  className={`group relative flex items-center gap-3 rounded-xl border-2 p-4 text-right transition-all duration-300 overflow-hidden ${
-                    selectedServices.includes(service.id)
-                      ? 'border-triply dark:border-triply-mint bg-gradient-to-br from-triply/10 via-triply-mint/10 to-triply-teal/10 dark:from-triply-mint/20 dark:via-triply-teal/10 dark:to-triply/10 shadow-lg scale-[1.03]'
-                      : 'border-triply-mint/40 dark:border-dark-border/50 bg-gradient-to-br from-triply-sand/5 to-white dark:from-dark-surface/30 dark:to-dark-elevated/40 hover:border-triply dark:hover:border-triply-teal hover:shadow-md hover:scale-[1.02]'
-                  }`}
-                >
-                  {/* Shine effect on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                  
-                  <span className="text-2xl relative z-10">{service.icon}</span>
-                  <span className="flex-1 font-semibold text-triply-dark dark:text-dark-text-primary relative z-10">{service.name}</span>
-                  {selectedServices.includes(service.id) && (
-                    <svg className="w-6 h-6 text-triply dark:text-triply-mint relative z-10 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* اختيار الميزانية */}
+          {/* اختيار الفئة */}
           <div className="space-y-4">
             <label className="flex items-center gap-2 text-lg font-bold text-triply-dark dark:text-dark-text-primary">
               <svg className="w-6 h-6 text-triply dark:text-triply-mint" fill="currentColor" viewBox="0 0 20 20">
@@ -396,6 +445,157 @@ function BookingSection() {
               ))}
             </div>
           </div>
+
+          {/* اختيار الخدمات */}
+          {selectedDestination && selectedBudget && (
+            <div className="space-y-4 animate-fade-in">
+              <label className="flex items-center gap-2 text-lg font-bold text-triply-dark dark:text-dark-text-primary">
+                <svg className="w-6 h-6 text-triply dark:text-triply-mint" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                  <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                </svg>
+                اختر الخدمات
+              </label>
+              <FormHelper text="اختر الخدمات التي تناسب رحلتك (اختياري)" />
+              
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* طيران */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-triply-dark dark:text-dark-text-primary">
+                    ✈️ الطيران
+                  </label>
+                  <select
+                    value={selectedFlight || ''}
+                    onChange={(e) => setSelectedFlight(e.target.value || null)}
+                    className="w-full rounded-xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white dark:bg-dark-elevated p-3 text-triply-dark dark:text-dark-text-primary focus:border-triply dark:focus:border-triply-mint focus:outline-none transition-all"
+                  >
+                    <option value="">لا أريد</option>
+                    {getAvailableOptions().flights.map((flight, idx) => (
+                      <option key={idx} value={JSON.stringify(flight)}>
+                        {flight.name} - {flight.price.toLocaleString()} ريال
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* فندق */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-triply-dark dark:text-dark-text-primary">
+                    🏨 الفندق
+                  </label>
+                  <select
+                    value={selectedHotel || ''}
+                    onChange={(e) => setSelectedHotel(e.target.value || null)}
+                    className="w-full rounded-xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white dark:bg-dark-elevated p-3 text-triply-dark dark:text-dark-text-primary focus:border-triply dark:focus:border-triply-mint focus:outline-none transition-all"
+                  >
+                    <option value="">لا أريد</option>
+                    {getAvailableOptions().hotels.map((hotel, idx) => (
+                      <option key={idx} value={JSON.stringify(hotel)}>
+                        {hotel.name} - {hotel.price.toLocaleString()} ريال/ليلة
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* مطعم */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-triply-dark dark:text-dark-text-primary">
+                    🍽️ المطعم
+                  </label>
+                  <select
+                    value={selectedRestaurant || ''}
+                    onChange={(e) => setSelectedRestaurant(e.target.value || null)}
+                    className="w-full rounded-xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white dark:bg-dark-elevated p-3 text-triply-dark dark:text-dark-text-primary focus:border-triply dark:focus:border-triply-mint focus:outline-none transition-all"
+                  >
+                    <option value="">لا أريد</option>
+                    {getAvailableOptions().restaurants.map((restaurant, idx) => (
+                      <option key={idx} value={JSON.stringify(restaurant)}>
+                        {restaurant.name} - {restaurant.price.toLocaleString()} ريال/وجبة
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* نشاط */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-triply-dark dark:text-dark-text-primary">
+                    🎯 النشاط
+                  </label>
+                  <select
+                    value={selectedActivity || ''}
+                    onChange={(e) => setSelectedActivity(e.target.value || null)}
+                    className="w-full rounded-xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white dark:bg-dark-elevated p-3 text-triply-dark dark:text-dark-text-primary focus:border-triply dark:focus:border-triply-mint focus:outline-none transition-all"
+                  >
+                    <option value="">لا أريد</option>
+                    {getAvailableOptions().activities.map((activity, idx) => (
+                      <option key={idx} value={JSON.stringify(activity)}>
+                        {activity.name} - {activity.price.toLocaleString()} ريال
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* عرض التكلفة الإجمالية */}
+              {(selectedFlight || selectedHotel || selectedRestaurant || selectedActivity) && (() => {
+                const totalCost = calculateTotalCost();
+                const converted = convertCurrency(totalCost);
+                return (
+                  <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-triply/10 to-triply-mint/10 dark:from-triply-mint/20 dark:to-triply-teal/10 border-2 border-triply dark:border-triply-mint">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-triply-dark dark:text-dark-text-primary">التكلفة الإجمالية:</span>
+                      <div className="text-left">
+                        <div className="text-xl font-bold text-triply dark:text-triply-mint">
+                          {totalCost.toLocaleString()} ريال 🇸🇦
+                        </div>
+                        {converted.currency !== 'ريال' && (
+                          <div className="text-sm text-triply-dark/70 dark:text-dark-text-secondary mt-1">
+                            {converted.flag} {Number(converted.local).toLocaleString()} {converted.symbol}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* تفاصيل الخدمات المختارة */}
+                    <div className="mt-3 pt-3 border-t border-triply/20 dark:border-triply-mint/20 space-y-2 text-sm">
+                      {selectedFlight && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-triply-dark/70 dark:text-dark-text-secondary">✈️ الطيران:</span>
+                          <span className="font-semibold text-triply-dark dark:text-dark-text-primary">{JSON.parse(selectedFlight).price.toLocaleString()} ريال</span>
+                        </div>
+                      )}
+                      {selectedHotel && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-triply-dark/70 dark:text-dark-text-secondary">🏨 الفندق:</span>
+                          <span className="font-semibold text-triply-dark dark:text-dark-text-primary">{JSON.parse(selectedHotel).price.toLocaleString()} ريال/ليلة</span>
+                        </div>
+                      )}
+                      {selectedRestaurant && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-triply-dark/70 dark:text-dark-text-secondary">🍽️ المطعم:</span>
+                          <span className="font-semibold text-triply-dark dark:text-dark-text-primary">{JSON.parse(selectedRestaurant).price.toLocaleString()} ريال/وجبة</span>
+                        </div>
+                      )}
+                      {selectedActivity && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-triply-dark/70 dark:text-dark-text-secondary">🎯 النشاط:</span>
+                          <span className="font-semibold text-triply-dark dark:text-dark-text-primary">{JSON.parse(selectedActivity).price.toLocaleString()} ريال</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {userBudget && parseFloat(userBudget) > 0 && totalCost > parseFloat(userBudget) && (
+                      <div className="mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
+                        <p className="text-sm text-red-600 dark:text-red-400">
+                          ⚠️ التكلفة تتجاوز الميزانية المحددة ({parseFloat(userBudget).toLocaleString()} ريال)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </form>
 
         {/* ملخص الاختيار */}
