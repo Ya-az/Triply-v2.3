@@ -1,3 +1,12 @@
+/**
+ * قسم ServicesSection - قسم الخدمات المقدمة
+ * يعرض الخدمات مثل:
+ * - تخطيط الرحلات
+ * - تنسيق الإقامة
+ * - تجارب الطعام
+ * - الأنشطة والفعاليات
+ */
+
 import { services } from '../../data/services.js';
 import { Card } from '../ui/Card.jsx';
 import { useStaggeredReveal } from '../../hooks/useScrollReveal.js';

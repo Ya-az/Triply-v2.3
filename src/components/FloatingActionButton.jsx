@@ -1,3 +1,11 @@
+/**
+ * مكون FloatingActionButton - زر عائم للإجراءات السريعة
+ * يظهر في أسفل الصفحة
+ * يوفر:
+ * - الدردشة مع المساعد الذكي
+ * - العودة لأعلى الصفحة
+ */
+
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { destinations } from '../data/destinations.js';
 import { services } from '../data/services.js';

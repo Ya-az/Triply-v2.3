@@ -1,3 +1,12 @@
+/**
+ * صفحة BookingDetailsPage - صفحة تفاصيل الحجز
+ * يدخل المستخدم:
+ * - الوجهة والتواريخ
+ * - اختيار الطيران والفندق
+ * - الأنشطة والمطاعم
+ * - حساب التكلفة الإجمالية
+ */
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GlassButton } from '../components/ui/GlassButton.jsx';

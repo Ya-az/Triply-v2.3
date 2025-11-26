@@ -1,3 +1,11 @@
+/**
+ * قسم HeroSection - القسم الترحيبي الأول
+ * يعرض:
+ * - عنوان رئيسي جذاب
+ * - وصف مختصر للموقع
+ * - أزرار Call-to-Action
+ */
+
 import { GlassButton } from '../ui/GlassButton.jsx';
 import { useScrollReveal } from '../../hooks/useScrollReveal.js';
 
@@ -40,24 +48,6 @@ function HeroSection() {
                 </GlassButton>
               </a>
             </div>
-            <dl ref={statsRef} className={`mt-8 grid grid-cols-2 gap-4 sm:gap-6 text-xs sm:text-sm text-white/80 dark:text-dark-text-secondary md:grid-cols-4 ${statsVisible ? 'reveal-fade-up' : 'reveal'}`}>
-              <div>
-                <dt className="font-semibold text-white dark:text-dark-text-primary text-sm sm:text-base">+1200 رحلة</dt>
-                <dd className="text-xs sm:text-sm">منذ 2019</dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-white dark:text-dark-text-primary text-sm sm:text-base">+300 شريك</dt>
-                <dd className="text-xs sm:text-sm">فنادق وطيران</dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-white dark:text-dark-text-primary text-sm sm:text-base">+95% رضا</dt>
-                <dd className="text-xs sm:text-sm">تقييم 4.9/5</dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-white dark:text-dark-text-primary text-sm sm:text-base">24/7 دعم</dt>
-                <dd className="text-xs sm:text-sm">مستشار رحلات</dd>
-              </div>
-            </dl>
           </div>
           <div className="glass-panel relative hidden h-full flex-col justify-center gap-6 rounded-3xl bg-white/80 dark:bg-dark-elevated/60 p-8 text-triply-dark dark:text-dark-text-primary shadow-ambient dark:shadow-ambient-dark md:flex">
             <h2 className="mb-2 text-lg font-semibold">مسارات مميزة</h2>

@@ -1,3 +1,9 @@
+/**
+ * مكون ProtectedRoute - حماية الصفحات
+ * يتحقق من تسجيل دخول المستخدم
+ * إذا لم يكن مسجل دخول، يحوله لصفحة تسجيل الدخول
+ */
+
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 

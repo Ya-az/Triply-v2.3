@@ -1,3 +1,11 @@
+/**
+ * ملف App.jsx - المكون الرئيسي للتطبيق
+ * يدير:
+ * - التنقل بين الصفحات (Router)
+ * - الحالة العامة للثيم والمصادقة (Contexts)
+ * - تحديد جميع المسارات والصفحات المحمية
+ */
+
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';

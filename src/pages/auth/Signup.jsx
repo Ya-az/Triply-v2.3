@@ -1,3 +1,11 @@
+/**
+ * مكون Signup - نموذج إنشاء حساب جديد
+ * يوفر:
+ * - حقول الاسم، البريد، كلمة المرور
+ * - التحقق من صحة البيانات
+ * - تسجيل بجوجل
+ */
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../../layouts/AuthLayout.jsx';

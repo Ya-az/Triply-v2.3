@@ -1,3 +1,12 @@
+/**
+ * صفحة PaymentSuccessPage - صفحة نجاح الدفع
+ * تعرض:
+ * - رسالة تأكيد نجاح الدفع
+ * - رمز QR للحجز
+ * - زر عرض الفاتورة
+ * - حفظ الحجز في حساب المستخدم
+ */
+
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';

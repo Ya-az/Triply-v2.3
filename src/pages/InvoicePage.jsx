@@ -1,3 +1,12 @@
+/**
+ * صفحة InvoicePage - صفحة الفاتورة
+ * تعرض:
+ * - تفاصيل الحجز الكاملة
+ * - رقم الفاتورة والمرجع
+ * - رمز QR
+ * - زر الطباعة/التحميل
+ */
+
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';

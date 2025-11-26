@@ -1,3 +1,9 @@
+/**
+ * ملف main.jsx - نقطة الدخول الرئيسية للتطبيق
+ * يربط تطبيق React مع ملف HTML الأساسي
+ * يحمل المكون الرئيسي App ويطبق التنسيقات العامة
+ */
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';

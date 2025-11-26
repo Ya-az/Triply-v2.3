@@ -1,3 +1,12 @@
+/**
+ * مكون Footer - تذييل الصفحة
+ * يحتوي على:
+ * - روابط سريعة للأقسام
+ * - معلومات التواصل
+ * - روابط السوشيال ميديا
+ * - حقوق الملكية
+ */
+
 import { BrandLogo } from './BrandLogo.jsx';
 import { GlassButton } from './ui/GlassButton.jsx';
 import { resourceLinks, socialLinks, supportLinks } from '../data/footerLinks.js';

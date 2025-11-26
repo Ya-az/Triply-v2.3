@@ -1,3 +1,11 @@
+/**
+ * صفحة Dashboard - لوحة التحكم للمستخدم المسجل
+ * تعرض:
+ * - معلومات المستخدم ونقاط الولاء
+ * - الحجوزات القادمة والسابقة
+ * - إمكانية إلغاء الحجوزات
+ */
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { Link } from 'react-router-dom';

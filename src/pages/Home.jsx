@@ -1,3 +1,9 @@
+/**
+ * صفحة Home - الصفحة الرئيسية للموقع
+ * تعرض جميع الأقسام الرئيسية:
+ * - القسم الترحيبي، الخدمات، الوجهات، طريقة العمل، الآراء، الحجز، التواصل
+ */
+
 import { HeroSection } from '../components/sections/HeroSection.jsx';
 import { ServicesSection } from '../components/sections/ServicesSection.jsx';
 import { HowItWorksSection } from '../components/sections/HowItWorksSection.jsx';

@@ -1,3 +1,12 @@
+/**
+ * مكون BookingProgressIndicator - مؤشر تقدم الحجز
+ * يعرض خطوات عملية الحجز:
+ * 1. تفاصيل الرحلة
+ * 2. المراجعة والتأكيد
+ * 3. الدفع
+ * 4. التأكيد النهائي
+ */
+
 import PropTypes from 'prop-types';
 
 function BookingProgressIndicator({ currentStep = 1, steps }) {

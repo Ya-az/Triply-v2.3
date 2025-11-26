@@ -1,3 +1,8 @@
+/**
+ * ملف services.js - بيانات الخدمات المقدمة
+ * يحتوي على قائمة بجميع الخدمات التي يوفرها الموقع
+ */
+
 export const services = [
   {
     id: 'service-travel',

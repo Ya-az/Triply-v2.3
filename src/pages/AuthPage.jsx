@@ -1,3 +1,11 @@
+/**
+ * صفحة AuthPage - صفحة المصادقة
+ * توفر:
+ * - تسجيل دخول للمستخدمين الحاليين
+ * - إنشاء حساب جديد
+ * - تسجيل دخول بجوجل
+ */
+
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';

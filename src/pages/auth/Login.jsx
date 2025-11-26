@@ -1,3 +1,11 @@
+/**
+ * مكون Login - نموذج تسجيل الدخول
+ * يوفر:
+ * - حقول البريد الإلكتروني وكلمة المرور
+ * - تسجيل دخول بجوجل
+ * - رابط لصفحة التسجيل
+ */
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../../layouts/AuthLayout.jsx';

@@ -1,3 +1,12 @@
+/**
+ * قسم BookingSection - قسم الحجز السريع
+ * يوفر نموذج حجز أولي مع:
+ * - اختيار الوجهة
+ * - اختيار الخدمات
+ * - تحديد الميزانية
+ * - حفظ التفضيلات في localStorage
+ */
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlassButton } from '../ui/GlassButton.jsx';

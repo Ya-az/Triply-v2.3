@@ -1,3 +1,12 @@
+/**
+ * مكون Navbar - شريط التنقل العلوي
+ * يحتوي على:
+ * - شعار الموقع
+ * - قائمة التنقل (الرئيسية، الوجهات، الخدمات، التواصل)
+ * - زر تسجيل الدخول/الخروج
+ * - مفتاح تغيير الثيم
+ */
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';

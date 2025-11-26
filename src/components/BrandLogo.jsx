@@ -1,3 +1,9 @@
+/**
+ * مكون BrandLogo - شعار الموقع Triply
+ * يعرض الشعار الرسمي للموقع
+ * قابل للنقر للعودة للصفحة الرئيسية
+ */
+
 import PropTypes from 'prop-types';
 import triplyLogo from '../assets/triply-logo.png';
 

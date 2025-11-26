@@ -1,3 +1,11 @@
+/**
+ * صفحة BookingConfirmationPage - صفحة تأكيد الحجز
+ * تعرض:
+ * - مراجعة شاملة لتفاصيل الحجز
+ * - التكلفة ازمفصلة
+ * - زر الانتقال للدفع
+ */
+
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GlassButton } from '../components/ui/GlassButton.jsx';

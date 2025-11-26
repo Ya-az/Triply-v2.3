@@ -1,3 +1,8 @@
+/**
+ * ملف useScrollReveal.js - Custom Hook لتأثيرات الظهور عند التمرير
+ * يوفر تأثيرات مثل fade-in, slide-up عند التمرير للعنصر
+ */
+
 import { useEffect, useRef, useState } from 'react';
 
 /**

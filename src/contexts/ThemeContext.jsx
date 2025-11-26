@@ -1,3 +1,11 @@
+/**
+ * ThemeContext - إدارة حالة الثيم (فاتح/داكن)
+ * يوفر:
+ * - التبديل بين الوضع الفاتح والداكن
+ * - حفظ اختيار المستخدم في localStorage
+ * - تطبيق الثيم على كامل التطبيق
+ */
+
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext(undefined);

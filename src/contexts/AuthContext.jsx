@@ -1,3 +1,11 @@
+/**
+ * AuthContext - إدارة حالة المصادقة والمستخدمين
+ * يوفر:
+ * - تسجيل الدخول والتسجيل والخروج
+ * - حفظ بيانات المستخدم في localStorage
+ * - إدارة الحجوزات لكل مستخدم
+ */
+
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();

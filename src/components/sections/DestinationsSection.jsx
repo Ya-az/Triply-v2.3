@@ -1,3 +1,10 @@
+/**
+ * قسم DestinationsSection - قسم الوجهات السياحية
+ * يعرض بطاقات للوجهات المتاحة مع:
+ * - الصورة، الاسم، الوصف
+ * - المدة، السعر
+ */
+
 import { destinations } from '../../data/destinations.js';
 import { useStaggeredReveal } from '../../hooks/useScrollReveal.js';
 

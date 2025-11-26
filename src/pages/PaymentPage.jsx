@@ -1,3 +1,11 @@
+/**
+ * صفحة PaymentPage - صفحة الدفع
+ * توفر:
+ * - اختيار طريقة الدفع (فيزا، مدى، أبل باي، إلخ)
+ * - إدخال بيانات الدفع بشكل آمن
+ * - معالجة عملية الدفع
+ */
+
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FeedbackToast } from '../components/ui/FeedbackToast';
