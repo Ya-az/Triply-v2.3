@@ -26,6 +26,8 @@ function BookingDetailsPage() {
   // الحالة الأساسية
   const [destination, setDestination] = useState('london');
   const [category, setCategory] = useState('budget');
+  
+  console.log('BookingDetailsPage loaded', { destination, category });
   const [arrivalDate, setArrivalDate] = useState('');
   const [departureDate, setDepartureDate] = useState('');
   const [days, setDays] = useState(0);
@@ -61,17 +63,22 @@ function BookingDetailsPage() {
     const savedPreferences = localStorage.getItem('triply-booking-preferences');
     const savedBookingData = localStorage.getItem('triply-booking-data');
 
+    console.log('📥 Loading preferences:', { savedPreferences, params: params.toString() });
+
     // أولوية للبيانات من URL parameters
     const urlDestination = params.get('destination');
     const urlCategory = params.get('category');
     const urlBudget = params.get('budget');
 
     if (urlDestination) {
+      console.log('✅ Setting destination from URL:', urlDestination);
       setDestination(urlDestination);
     } else if (savedPreferences) {
       try {
         const parsed = JSON.parse(savedPreferences);
+        console.log('📦 Parsed preferences:', parsed);
         if (parsed.destinationKey) {
+          console.log('✅ Setting destination from localStorage:', parsed.destinationKey);
           setDestination(parsed.destinationKey);
         }
       } catch (e) {
@@ -81,11 +88,13 @@ function BookingDetailsPage() {
 
     // تعيين الفئة (category) من URL أو localStorage
     if (urlCategory) {
+      console.log('✅ Setting category from URL:', urlCategory);
       setCategory(urlCategory);
     } else if (savedPreferences) {
       try {
         const parsed = JSON.parse(savedPreferences);
         if (parsed.budget) {
+          console.log('✅ Setting category from localStorage:', parsed.budget);
           setCategory(parsed.budget);
         }
       } catch (e) {
@@ -95,11 +104,13 @@ function BookingDetailsPage() {
 
     // تعيين الميزانية المحددة
     if (urlBudget) {
+      console.log('✅ Setting budget from URL:', urlBudget);
       setBudget(urlBudget);
     } else if (savedPreferences) {
       try {
         const parsed = JSON.parse(savedPreferences);
         if (parsed.userBudget) {
+          console.log('✅ Setting budget from localStorage:', parsed.userBudget);
           setBudget(parsed.userBudget);
         }
       } catch (e) {
@@ -184,30 +195,58 @@ function BookingDetailsPage() {
     let total = 0;
 
     // الطيران
-    if (selectedFlight) {
-      const flight = typeof selectedFlight === 'string' ? JSON.parse(selectedFlight) : selectedFlight;
-      total += flight.price;
+    if (selectedFlight && selectedFlight !== 'selected') {
+      try {
+        const flight = typeof selectedFlight === 'string' ? JSON.parse(selectedFlight) : selectedFlight;
+        if (flight.price) {
+          total += flight.price;
+        }
+      } catch (e) {
+        console.log('Flight data is not a JSON object:', selectedFlight);
+      }
     }
 
     // الفندق
-    if (selectedHotel && days > 0) {
-      const hotel = typeof selectedHotel === 'string' ? JSON.parse(selectedHotel) : selectedHotel;
-      total += hotel.price * days;
+    if (selectedHotel && selectedHotel !== 'selected' && days > 0) {
+      try {
+        const hotel = typeof selectedHotel === 'string' ? JSON.parse(selectedHotel) : selectedHotel;
+        if (hotel.price) {
+          total += hotel.price * days;
+        }
+      } catch (e) {
+        console.log('Hotel data is not a JSON object:', selectedHotel);
+      }
     }
 
     // المطاعم
     if (selectedRestaurants.length > 0) {
       selectedRestaurants.forEach(rest => {
-        const restaurant = typeof rest === 'string' ? JSON.parse(rest) : rest;
-        total += restaurant.price;
+        if (rest !== 'selected') {
+          try {
+            const restaurant = typeof rest === 'string' ? JSON.parse(rest) : rest;
+            if (restaurant.price) {
+              total += restaurant.price;
+            }
+          } catch (e) {
+            console.log('Restaurant data is not a JSON object:', rest);
+          }
+        }
       });
     }
 
     // الأنشطة
     if (selectedActivities.length > 0) {
       selectedActivities.forEach(act => {
-        const activity = typeof act === 'string' ? JSON.parse(act) : act;
-        total += activity.price;
+        if (act !== 'selected') {
+          try {
+            const activity = typeof act === 'string' ? JSON.parse(act) : act;
+            if (activity.price) {
+              total += activity.price;
+            }
+          } catch (e) {
+            console.log('Activity data is not a JSON object:', act);
+          }
+        }
       });
     }
 
@@ -226,6 +265,8 @@ function BookingDetailsPage() {
   const hotels = cityData?.hotels?.[category] || [];
   const restaurants = cityData?.restaurants?.[category] || [];
   const activities = cityData?.activities || [];
+  
+  console.log('cityData:', { cityData, flights: flights.length, hotels: hotels.length, restaurants: restaurants.length, activities: activities.length });
 
   // فلترة الأنشطة حسب الفئة
   const filteredActivities = activities.filter(act => act.category === category);

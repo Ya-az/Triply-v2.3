@@ -9,6 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { GlassButton } from '../ui/GlassButton.jsx';
 import { FeedbackToast } from '../ui/FeedbackToast.jsx';
 import { bookingServices, budgetLevels, bookingDestinations, destinationMapping } from '../../data/bookingOptions.js';
@@ -23,6 +24,7 @@ const STORAGE_KEY = 'triply-booking-preferences';
 
 function BookingSection() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedBudget, setSelectedBudget] = useState('');
   const [selectedDestination, setSelectedDestination] = useState('');
@@ -88,24 +90,9 @@ function BookingSection() {
 
   // حساب التكلفة الإجمالية للخدمات المختارة
   const calculateTotalCost = () => {
-    let total = 0;
-    if (selectedFlight) {
-      const flight = JSON.parse(selectedFlight);
-      total += flight.price;
-    }
-    if (selectedHotel) {
-      const hotel = JSON.parse(selectedHotel);
-      total += hotel.price;
-    }
-    if (selectedRestaurant) {
-      const restaurant = JSON.parse(selectedRestaurant);
-      total += restaurant.price;
-    }
-    if (selectedActivity) {
-      const activity = JSON.parse(selectedActivity);
-      total += activity.price;
-    }
-    return total;
+    // البطاقات الآن لا تحتوي على أسعار محددة، فقط اختيار نعم/لا
+    // يمكن إرجاع 0 أو حساب تقديري
+    return 0;
   };
 
   // دالة لتحويل السعر لعملة الدولة
@@ -191,17 +178,23 @@ function BookingSection() {
   };
 
   const handleGetPriceQuote = () => {
-    // تحويل اسم الوجهة العربي إلى المفتاح الانجليزي
+    // إذا المستخدم مو مسجل دخول، نوديه لصفحة تسجيل الدخول
+    if (!user) {
+      setFeedback({ message: 'يرجى تسجيل الدخول للمتابعة للحجز', variant: 'error' });
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+      return;
+    }
+
     const destinationKey = destinationMapping[selectedDestination] || 'london';
     
-    // حفظ البيانات قبل الانتقال
     const snapshot = {
       destination: selectedDestination,
       destinationKey: destinationKey,
       services: selectedServices,
       budget: selectedBudget,
       userBudget: userBudget,
-      // حفظ الخدمات المختارة
       selectedFlight: selectedFlight,
       selectedHotel: selectedHotel,
       selectedRestaurant: selectedRestaurant,
@@ -209,7 +202,6 @@ function BookingSection() {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
     
-    // التوجيه للصفحة مع معلمات URL (المفتاح الانجليزي والميزانية)
     const params = new URLSearchParams();
     if (destinationKey) {
       params.append('destination', destinationKey);
@@ -223,6 +215,8 @@ function BookingSection() {
     const queryString = params.toString();
     navigate(`/booking-details${queryString ? '?' + queryString : ''}`);
   };
+
+
 
   const handleSavePreferences = () => {
     const snapshot = {
@@ -275,40 +269,14 @@ function BookingSection() {
           <p className="mx-auto max-w-2xl text-sm sm:text-base leading-7 text-triply-slate/75 dark:text-dark-text-secondary">
             اختر الوجهة والخدمات التي تحتاجها، وحدد ميزانيتك، ودعنا نخطط لك رحلة مثالية تناسب احتياجاتك
           </p>
-          <div className="flex flex-wrap justify-center gap-3 text-sm">
-            <GlassButton
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleSavePreferences}
-              disabled={!selectedDestination && selectedServices.length === 0 && !selectedBudget}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
-              </svg>
-              حفظ اختياراتي
-            </GlassButton>
-            <GlassButton
-              type="button"
-              variant="accent"
-              size="sm"
-              onClick={handleRestorePreferences}
-              disabled={!hasSavedPreferences}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-              </svg>
-              استرجاع الاختيار
-            </GlassButton>
-          </div>
+
 
           {/* Progress Indicator */}
           <BookingProgressIndicator currentStep={currentStep} />
         </div>
 
-        <form
+        <div
           ref={formRef}
-          onSubmit={handleSubmit}
           className={`space-y-8 rounded-3xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white/95 dark:bg-dark-elevated/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 shadow-2xl hover:shadow-3xl transition-shadow duration-300 ${formVisible ? 'reveal-scale' : 'reveal'}`}
         >
           <FeedbackToast
@@ -448,7 +416,7 @@ function BookingSection() {
 
           {/* اختيار الخدمات */}
           {selectedDestination && selectedBudget && (
-            <div className="space-y-4 animate-fade-in">
+            <div className="space-y-6 animate-fade-in">
               <label className="flex items-center gap-2 text-lg font-bold text-triply-dark dark:text-dark-text-primary">
                 <svg className="w-6 h-6 text-triply dark:text-triply-mint" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
@@ -456,150 +424,115 @@ function BookingSection() {
                 </svg>
                 اختر الخدمات
               </label>
-              <FormHelper text="اختر الخدمات التي تناسب رحلتك (اختياري)" />
+              <FormHelper text="اختر الخدمات التي تحتاجها" />
               
-              <div className="grid gap-4 sm:grid-cols-2">
-                {/* طيران */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-triply-dark dark:text-dark-text-primary">
-                    ✈️ الطيران
-                  </label>
-                  <select
-                    value={selectedFlight || ''}
-                    onChange={(e) => setSelectedFlight(e.target.value || null)}
-                    className="w-full rounded-xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white dark:bg-dark-elevated p-3 text-triply-dark dark:text-dark-text-primary focus:border-triply dark:focus:border-triply-mint focus:outline-none transition-all"
-                  >
-                    <option value="">لا أريد</option>
-                    {getAvailableOptions().flights.map((flight, idx) => (
-                      <option key={idx} value={JSON.stringify(flight)}>
-                        {flight.name} - {flight.price.toLocaleString()} ريال
-                      </option>
-                    ))}
-                  </select>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {/* حجز طيران */}
+                <div 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedFlight(selectedFlight ? null : 'selected');
+                  }}
+                  className={`group relative flex items-center gap-4 rounded-2xl border-2 p-6 text-right transition-all duration-300 overflow-hidden backdrop-blur-sm cursor-pointer ${
+                    selectedFlight 
+                      ? 'border-blue-500 dark:border-blue-500 bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 dark:from-blue-900/60 dark:via-blue-950/50 dark:to-blue-900/60 shadow-xl shadow-blue-500/30 scale-[1.02]'
+                      : 'border-blue-200/60 dark:border-blue-800/40 bg-gradient-to-br from-blue-50/80 via-white to-blue-50/50 dark:from-blue-950/40 dark:via-dark-surface/80 dark:to-blue-950/30 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:shadow-blue-500/20 hover:-translate-y-1 hover:scale-[1.02]'
+                  }`}>
+                  {/* Background Decoration */}
+                  <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-blue-200/30 dark:bg-blue-800/20 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                  
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700 text-4xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg shadow-blue-500/30">
+                    ✈️
+                  </div>
+                  <div className="flex-1 text-right relative z-10">
+                    <div className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-1">حجز طيران</div>
+                    <p className="text-sm text-blue-700/70 dark:text-blue-300/70">رحلات جوية مريحة</p>
+                  </div>
                 </div>
 
-                {/* فندق */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-triply-dark dark:text-dark-text-primary">
-                    🏨 الفندق
-                  </label>
-                  <select
-                    value={selectedHotel || ''}
-                    onChange={(e) => setSelectedHotel(e.target.value || null)}
-                    className="w-full rounded-xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white dark:bg-dark-elevated p-3 text-triply-dark dark:text-dark-text-primary focus:border-triply dark:focus:border-triply-mint focus:outline-none transition-all"
-                  >
-                    <option value="">لا أريد</option>
-                    {getAvailableOptions().hotels.map((hotel, idx) => (
-                      <option key={idx} value={JSON.stringify(hotel)}>
-                        {hotel.name} - {hotel.price.toLocaleString()} ريال/ليلة
-                      </option>
-                    ))}
-                  </select>
+                {/* حجز فنادق */}
+                <div 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedHotel(selectedHotel ? null : 'selected');
+                  }}
+                  className={`group relative flex items-center gap-4 rounded-2xl border-2 p-6 text-right transition-all duration-300 overflow-hidden backdrop-blur-sm cursor-pointer ${
+                    selectedHotel 
+                      ? 'border-rose-500 dark:border-rose-500 bg-gradient-to-br from-rose-100 via-rose-50 to-rose-100 dark:from-rose-900/60 dark:via-rose-950/50 dark:to-rose-900/60 shadow-xl shadow-rose-500/30 scale-[1.02]'
+                      : 'border-rose-200/60 dark:border-rose-800/40 bg-gradient-to-br from-rose-50/80 via-white to-rose-50/50 dark:from-rose-950/40 dark:via-dark-surface/80 dark:to-rose-950/30 hover:border-rose-400 dark:hover:border-rose-600 hover:shadow-xl hover:shadow-rose-500/20 hover:-translate-y-1 hover:scale-[1.02]'
+                  }`}>
+                  {/* Background Decoration */}
+                  <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-rose-200/30 dark:bg-rose-800/20 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                  
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-400 to-rose-600 dark:from-rose-500 dark:to-rose-700 text-4xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg shadow-rose-500/30">
+                    🏨
+                  </div>
+                  <div className="flex-1 text-right relative z-10">
+                    <div className="text-lg font-bold text-rose-900 dark:text-rose-100 mb-1">حجز فنادق</div>
+                    <p className="text-sm text-rose-700/70 dark:text-rose-300/70">إقامة فاخرة ومريحة</p>
+                  </div>
                 </div>
 
-                {/* مطعم */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-triply-dark dark:text-dark-text-primary">
-                    🍽️ المطعم
-                  </label>
-                  <select
-                    value={selectedRestaurant || ''}
-                    onChange={(e) => setSelectedRestaurant(e.target.value || null)}
-                    className="w-full rounded-xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white dark:bg-dark-elevated p-3 text-triply-dark dark:text-dark-text-primary focus:border-triply dark:focus:border-triply-mint focus:outline-none transition-all"
-                  >
-                    <option value="">لا أريد</option>
-                    {getAvailableOptions().restaurants.map((restaurant, idx) => (
-                      <option key={idx} value={JSON.stringify(restaurant)}>
-                        {restaurant.name} - {restaurant.price.toLocaleString()} ريال/وجبة
-                      </option>
-                    ))}
-                  </select>
+                {/* حجز مطاعم */}
+                <div 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedRestaurant(selectedRestaurant ? null : 'selected');
+                  }}
+                  className={`group relative flex items-center gap-4 rounded-2xl border-2 p-6 text-right transition-all duration-300 overflow-hidden backdrop-blur-sm cursor-pointer ${
+                    selectedRestaurant 
+                      ? 'border-slate-500 dark:border-slate-500 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800/60 dark:via-slate-900/50 dark:to-slate-800/60 shadow-xl shadow-slate-500/30 scale-[1.02]'
+                      : 'border-slate-200/60 dark:border-slate-700/40 bg-gradient-to-br from-slate-50/80 via-white to-slate-50/50 dark:from-slate-900/40 dark:via-dark-surface/80 dark:to-slate-900/30 hover:border-slate-400 dark:hover:border-slate-600 hover:shadow-xl hover:shadow-slate-500/20 hover:-translate-y-1 hover:scale-[1.02]'
+                  }`}>
+                  {/* Background Decoration */}
+                  <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-slate-200/30 dark:bg-slate-700/20 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                  
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 dark:from-slate-500 dark:to-slate-700 text-4xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg shadow-slate-500/30">
+                    🍽️
+                  </div>
+                  <div className="flex-1 text-right relative z-10">
+                    <div className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">حجز مطاعم</div>
+                    <p className="text-sm text-slate-700/70 dark:text-slate-300/70">تجربة طعام مميزة</p>
+                  </div>
                 </div>
 
-                {/* نشاط */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-triply-dark dark:text-dark-text-primary">
-                    🎯 النشاط
-                  </label>
-                  <select
-                    value={selectedActivity || ''}
-                    onChange={(e) => setSelectedActivity(e.target.value || null)}
-                    className="w-full rounded-xl border-2 border-triply-mint/40 dark:border-dark-border/50 bg-white dark:bg-dark-elevated p-3 text-triply-dark dark:text-dark-text-primary focus:border-triply dark:focus:border-triply-mint focus:outline-none transition-all"
-                  >
-                    <option value="">لا أريد</option>
-                    {getAvailableOptions().activities.map((activity, idx) => (
-                      <option key={idx} value={JSON.stringify(activity)}>
-                        {activity.name} - {activity.price.toLocaleString()} ريال
-                      </option>
-                    ))}
-                  </select>
+                {/* أنشطة وجولات */}
+                <div 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedActivity(selectedActivity ? null : 'selected');
+                  }}
+                  className={`group relative flex items-center gap-4 rounded-2xl border-2 p-6 text-right transition-all duration-300 overflow-hidden backdrop-blur-sm cursor-pointer ${
+                    selectedActivity 
+                      ? 'border-pink-500 dark:border-pink-500 bg-gradient-to-br from-pink-100 via-pink-50 to-pink-100 dark:from-pink-900/60 dark:via-pink-950/50 dark:to-pink-900/60 shadow-xl shadow-pink-500/30 scale-[1.02]'
+                      : 'border-pink-200/60 dark:border-pink-800/40 bg-gradient-to-br from-pink-50/80 via-white to-pink-50/50 dark:from-pink-950/40 dark:via-dark-surface/80 dark:to-pink-950/30 hover:border-pink-400 dark:hover:border-pink-600 hover:shadow-xl hover:shadow-pink-500/20 hover:-translate-y-1 hover:scale-[1.02]'
+                  }`}>
+                  {/* Background Decoration */}
+                  <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-pink-200/30 dark:bg-pink-800/20 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                  
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 to-pink-600 dark:from-pink-500 dark:to-pink-700 text-4xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg shadow-pink-500/30">
+                    🎯
+                  </div>
+                  <div className="flex-1 text-right relative z-10">
+                    <div className="text-lg font-bold text-pink-900 dark:text-pink-100 mb-1">أنشطة وجولات</div>
+                    <p className="text-sm text-pink-700/70 dark:text-pink-300/70">أنشطة ممتعة ومغامرات</p>
+                  </div>
                 </div>
               </div>
 
-              {/* عرض التكلفة الإجمالية */}
-              {(selectedFlight || selectedHotel || selectedRestaurant || selectedActivity) && (() => {
-                const totalCost = calculateTotalCost();
-                const converted = convertCurrency(totalCost);
-                return (
-                  <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-triply/10 to-triply-mint/10 dark:from-triply-mint/20 dark:to-triply-teal/10 border-2 border-triply dark:border-triply-mint">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-bold text-triply-dark dark:text-dark-text-primary">التكلفة الإجمالية:</span>
-                      <div className="text-left">
-                        <div className="text-xl font-bold text-triply dark:text-triply-mint">
-                          {totalCost.toLocaleString()} ريال 🇸🇦
-                        </div>
-                        {converted.currency !== 'ريال' && (
-                          <div className="text-sm text-triply-dark/70 dark:text-dark-text-secondary mt-1">
-                            {converted.flag} {Number(converted.local).toLocaleString()} {converted.symbol}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* تفاصيل الخدمات المختارة */}
-                    <div className="mt-3 pt-3 border-t border-triply/20 dark:border-triply-mint/20 space-y-2 text-sm">
-                      {selectedFlight && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-triply-dark/70 dark:text-dark-text-secondary">✈️ الطيران:</span>
-                          <span className="font-semibold text-triply-dark dark:text-dark-text-primary">{JSON.parse(selectedFlight).price.toLocaleString()} ريال</span>
-                        </div>
-                      )}
-                      {selectedHotel && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-triply-dark/70 dark:text-dark-text-secondary">🏨 الفندق:</span>
-                          <span className="font-semibold text-triply-dark dark:text-dark-text-primary">{JSON.parse(selectedHotel).price.toLocaleString()} ريال/ليلة</span>
-                        </div>
-                      )}
-                      {selectedRestaurant && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-triply-dark/70 dark:text-dark-text-secondary">🍽️ المطعم:</span>
-                          <span className="font-semibold text-triply-dark dark:text-dark-text-primary">{JSON.parse(selectedRestaurant).price.toLocaleString()} ريال/وجبة</span>
-                        </div>
-                      )}
-                      {selectedActivity && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-triply-dark/70 dark:text-dark-text-secondary">🎯 النشاط:</span>
-                          <span className="font-semibold text-triply-dark dark:text-dark-text-primary">{JSON.parse(selectedActivity).price.toLocaleString()} ريال</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {userBudget && parseFloat(userBudget) > 0 && totalCost > parseFloat(userBudget) && (
-                      <div className="mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
-                        <p className="text-sm text-red-600 dark:text-red-400">
-                          ⚠️ التكلفة تتجاوز الميزانية المحددة ({parseFloat(userBudget).toLocaleString()} ريال)
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+
+
+
             </div>
           )}
-        </form>
+        </div>
 
         {/* ملخص الاختيار */}
-        {(selectedDestination || selectedServices.length > 0 || selectedBudget) && (
+        {(selectedDestination || selectedServices.length > 0 || selectedBudget || selectedFlight || selectedHotel || selectedRestaurant || selectedActivity) && (
           <div className="mt-8 rounded-2xl border-2 border-triply/30 dark:border-triply-mint/40 bg-gradient-to-br from-triply-sand/40 via-triply-mint/10 to-white dark:from-triply-teal/20 dark:via-dark-elevated/80 dark:to-dark-surface/60 backdrop-blur-sm p-6 sm:p-8 shadow-xl">
             <div className="flex items-center gap-3 mb-5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-triply to-triply-teal dark:from-triply-mint dark:to-triply-teal shadow-lg">
@@ -648,10 +581,44 @@ function BookingSection() {
                   </div>
                 </div>
               )}
+              
+              {/* الخدمات الإضافية المختارة */}
+              {(selectedFlight || selectedHotel || selectedRestaurant || selectedActivity) && (
+                <div className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-gradient-to-br from-triply/5 to-triply-mint/10 dark:from-triply-teal/10 dark:to-triply-mint/5 border-2 border-triply/20 dark:border-triply-mint/30 shadow-sm">
+                  <svg className="w-5 h-5 text-triply dark:text-triply-mint flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1">
+                    <strong className="text-triply-dark dark:text-dark-text-primary block mb-2">الخدمات الإضافية:</strong>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedFlight && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-sm font-medium border border-blue-200 dark:border-blue-800">
+                          ✈️ حجز طيران
+                        </span>
+                      )}
+                      {selectedHotel && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-200 text-sm font-medium border border-rose-200 dark:border-rose-800">
+                          🏨 حجز فنادق
+                        </span>
+                      )}
+                      {selectedRestaurant && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/50 text-slate-800 dark:text-slate-200 text-sm font-medium border border-slate-200 dark:border-slate-700">
+                          🍽️ حجز مطاعم
+                        </span>
+                      )}
+                      {selectedActivity && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200 text-sm font-medium border border-pink-200 dark:border-pink-800">
+                          🎯 أنشطة وجولات
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* زر الانتقال لصفحة الأسعار المفصلة */}
-            <div className="mt-6 pt-6 border-t-2 border-triply-mint/30 dark:border-triply-teal/30">
+            {/* زر الانتقال لصفحة الحجز */}
+            <div className="mt-6 pt-6 border-t-2 border-triply/20 dark:border-triply-mint/30">
               <GlassButton
                 type="button"
                 variant="primary"
@@ -660,15 +627,19 @@ function BookingSection() {
                 className="w-full"
                 disabled={!selectedDestination}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-3">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
                   </svg>
-                  احجز الآن واحصل على عرض سعر مفصّل
+                  <span className="text-lg font-bold">احجز الآن واحصل على عرض سعر مفصّل</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
                 </div>
               </GlassButton>
             </div>
+
           </div>
         )}
       </div>
